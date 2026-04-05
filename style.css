@@ -489,19 +489,19 @@ body, html {
     pointer-events: none;
     z-index: -1;
 }
-.cluster-pulse-onsite {
-    border-color: var(--color-onsite);
+.cluster-pulse-onsite { border-color: var(--color-onsite); }
+.cluster-pulse-nearsite { border-color: var(--color-nearsite); }
+.cluster-pulse-remote { border-color: var(--color-remote); }
+.cluster-pulse-pureremote { border-color: white; }
+
+body.hover-preview-on-site .cluster-pulse-onsite,
+body.hover-preview-near-site .cluster-pulse-nearsite,
+body.hover-preview-remote .cluster-pulse-remote,
+body.hover-preview-pure-remote .cluster-pulse-pureremote {
     animation: cluster-pulse-anim 2s infinite ease-out;
 }
-.cluster-pulse-nearsite {
-    border-color: var(--color-nearsite);
-    animation: cluster-pulse-anim-alt 2s infinite ease-out;
-}
+
 @keyframes cluster-pulse-anim {
-    0% { transform: scale(1); opacity: 0.8; border-width: 4px; }
-    100% { transform: scale(1.5); opacity: 0; border-width: 1px; }
-}
-@keyframes cluster-pulse-anim-alt {
     0% { transform: scale(1); opacity: 0.8; border-width: 4px; }
     100% { transform: scale(1.5); opacity: 0; border-width: 1px; }
 }

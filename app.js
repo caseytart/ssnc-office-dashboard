@@ -63,6 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const uiToggleBtn = document.getElementById('ui-visibility-toggle');
     const toggleUI = () => {
         const isHidden = document.body.classList.toggle('ui-hidden');
+        if (isHidden) {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.remove('active');
+        }
         if (uiToggleBtn) {
             uiToggleBtn.classList.toggle('active', isHidden);
             
@@ -402,6 +406,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Hover Preview Effect
                 item.addEventListener('mouseenter', () => {
+                    document.body.classList.add(`hover-preview-${type}`);
+                    
                     locationData.forEach(loc => {
                         if (loc.type === type && loc.filteredStaff > 0) {
                             const marker = markersById[loc.id];
@@ -413,6 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 item.addEventListener('mouseleave', () => {
+                    document.body.classList.remove(`hover-preview-${type}`);
                     document.querySelectorAll('.legend-hover-preview').forEach(el => el.classList.remove('legend-hover-preview'));
                 });
 
@@ -479,6 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 let clusterTechs = 0;
                 let hasOnsite = false;
                 let hasNearsite = false;
+                let hasRemote = false;
+                let hasPureRemote = false;
 
                 children.forEach(m => {
                     if (m.options && m.options.locData) {
@@ -486,8 +495,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             clusterUsers += (m.options.locData.filteredStaff || 0);
                             clusterTechs += (m.options.locData.itFieldSupport || 0);
                             
-                            if (m.options.locData.type === 'on-site') hasOnsite = true;
-                            if (m.options.locData.type === 'near-site') hasNearsite = true;
+                            const t = m.options.locData.type;
+                            if (t === 'on-site') hasOnsite = true;
+                            if (t === 'near-site') hasNearsite = true;
+                            if (t === 'remote') hasRemote = true;
+                            if (t === 'pure-remote') hasPureRemote = true;
                         }
                     }
                 });
@@ -505,11 +517,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const techHtml = clusterTechs > 0 ? `<div class="cluster-techs">${clusterTechs} Techs</div>` : '';
                 
                 let pulseHtml = '';
-                if (hasOnsite) {
-                    pulseHtml = '<div class="cluster-pulse-ring cluster-pulse-onsite"></div>';
-                } else if (hasNearsite) {
-                    pulseHtml = '<div class="cluster-pulse-ring cluster-pulse-nearsite"></div>';
-                }
+                if (hasOnsite) pulseHtml += '<div class="cluster-pulse-ring cluster-pulse-onsite"></div>';
+                if (hasNearsite) pulseHtml += '<div class="cluster-pulse-ring cluster-pulse-nearsite"></div>';
+                if (hasRemote) pulseHtml += '<div class="cluster-pulse-ring cluster-pulse-remote"></div>';
+                if (hasPureRemote) pulseHtml += '<div class="cluster-pulse-ring cluster-pulse-pureremote"></div>';
 
                 return L.divIcon({ 
                     html: `
