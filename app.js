@@ -99,9 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (isManual) {
-                map.flyToBounds(bounds, { padding: [30, 30], duration: 1.5 });
+                map.fitBounds(bounds, { padding: [30, 30], animate: true, duration: 1.5, easeLinearity: 0.25 });
             } else {
-                map.fitBounds(bounds, { padding: [30, 30], animate: true });
+                map.fitBounds(bounds, { padding: [30, 30], animate: true, duration: 1.0 });
             }
         }
     };
@@ -118,8 +118,23 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             const region = e.currentTarget.getAttribute('data-region');
             if (regionBounds[region]) {
+                // Perfect hardcoded framing
                 const bounds = L.latLngBounds(regionBounds[region]);
-                map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+                map.fitBounds(bounds, { padding: [20, 20], animate: true, duration: 1.5, easeLinearity: 0.25 });
+                
+                // Actual Data Filtering
+                if (window.globalFilters) {
+                    window.globalFilters.region = (region === 'Global') ? 'All' : region;
+                    
+                    document.querySelectorAll('.quick-region-list-btn').forEach(b => b.classList.remove('active'));
+                    if (region !== 'Global') {
+                        e.currentTarget.classList.add('active');
+                    }
+                    
+                    if (window.recalculateMetricsAndMap) {
+                        window.recalculateMetricsAndMap(true); // pass true to skip dynamic snap
+                    }
+                }
             }
         });
     });
@@ -462,11 +477,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 let clusterUsers = 0;
                 let clusterTechs = 0;
+                let hasOnsite = false;
+                let hasNearsite = false;
 
                 children.forEach(m => {
                     if (m.options && m.options.locData) {
-                        clusterUsers += (m.options.locData.filteredStaff || 0);
-                        clusterTechs += (m.options.locData.itFieldSupport || 0);
+                        if (m.options.locData.filteredStaff > 0) {
+                            clusterUsers += (m.options.locData.filteredStaff || 0);
+                            clusterTechs += (m.options.locData.itFieldSupport || 0);
+                            
+                            if (m.options.locData.type === 'on-site') hasOnsite = true;
+                            if (m.options.locData.type === 'near-site') hasNearsite = true;
+                        }
                     }
                 });
 
@@ -481,9 +503,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (clusterUsers > 10000) size = 60;
                 
                 const techHtml = clusterTechs > 0 ? `<div class="cluster-techs">${clusterTechs} Techs</div>` : '';
+                
+                let pulseHtml = '';
+                if (hasOnsite) {
+                    pulseHtml = '<div class="cluster-pulse-ring cluster-pulse-onsite"></div>';
+                } else if (hasNearsite) {
+                    pulseHtml = '<div class="cluster-pulse-ring cluster-pulse-nearsite"></div>';
+                }
 
                 return L.divIcon({ 
                     html: `
+                        ${pulseHtml}
                         <div class="cluster-content">
                             <div class="cluster-users">${clusterUsers.toLocaleString()}</div>
                             ${techHtml}
@@ -523,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createLegend();
 
         // --- DASHBOARD & METRICS ENGINE ---
-        window.recalculateMetricsAndMap = () => {
+        window.recalculateMetricsAndMap = (skipSnap = false) => {
             const filterExec = window.globalFilters.executive;
             const filterRegion = window.globalFilters.region;
             const filterMetro = window.globalFilters.metroArea;
@@ -644,11 +674,11 @@ document.addEventListener('DOMContentLoaded', () => {
             updateMetroFlares();
             
             // Phase 6: Auto-center and zoom map
-            const filtersApplied = filterExec !== 'All' || filterCoverage !== 'All';
+            const filtersApplied = filterExec !== 'All' || filterCoverage !== 'All' || filterRegion !== 'All';
             const clearBtn = document.getElementById('clear-filters-btn');
             if (clearBtn) clearBtn.style.display = filtersApplied ? 'flex' : 'none';
 
-            window.snapToActiveExtent(false); 
+            if (!skipSnap) window.snapToActiveExtent(false); 
         };
 
         // Populate Executive Filter Dropdown

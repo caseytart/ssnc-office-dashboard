@@ -456,22 +456,54 @@ body, html {
 /* MarkerCluster Custom Styles */
 .custom-cluster-icon {
     border-radius: 50%;
-    background: var(--bg-glass);
+    background: rgba(30, 41, 59, 0.9);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 2px solid var(--text-primary);
-    color: var(--text-primary);
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: #f8fafc !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     display: flex !important;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-family: 'Inter', sans-serif;
     transition: all 0.3s ease;
+    position: relative;
+}
+[data-theme="light"] .custom-cluster-icon {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f172a !important;
+    border-color: rgba(0, 0, 0, 0.2);
+    text-shadow: none;
 }
 .custom-cluster-icon:hover {
     transform: scale(1.1);
     border-color: var(--color-onsite);
+}
+.cluster-pulse-ring {
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    pointer-events: none;
+    z-index: -1;
+}
+.cluster-pulse-onsite {
+    border-color: var(--color-onsite);
+    animation: cluster-pulse-anim 2s infinite ease-out;
+}
+.cluster-pulse-nearsite {
+    border-color: var(--color-nearsite);
+    animation: cluster-pulse-anim-alt 2s infinite ease-out;
+}
+@keyframes cluster-pulse-anim {
+    0% { transform: scale(1); opacity: 0.8; border-width: 4px; }
+    100% { transform: scale(1.5); opacity: 0; border-width: 1px; }
+}
+@keyframes cluster-pulse-anim-alt {
+    0% { transform: scale(1); opacity: 0.8; border-width: 4px; }
+    100% { transform: scale(1.5); opacity: 0; border-width: 1px; }
 }
 .cluster-content {
     display: flex;
@@ -496,12 +528,14 @@ body, html {
     transform: translateX(-20px) scale(0.95);
 }
 
-body.ui-hidden .theme-toggle {
-    opacity: 0.3 !important;
+body.ui-hidden #theme-toggle {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(-20px) scale(0.95);
 }
 
-body.ui-hidden .ui-toggle-btn {
-    opacity: 0.8 !important; /* Keep the toggle semi-visible to bring UI back */
+body.ui-hidden #ui-visibility-toggle {
+    opacity: 0.4 !important; /* Keep the toggle semi-visible to bring UI back */
     background: rgba(255, 255, 255, 0.2);
 }
 
