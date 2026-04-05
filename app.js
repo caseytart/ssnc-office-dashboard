@@ -6,7 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
         zoomControl: false, // Put zoom elsewhere
         maxBounds: maxBounds,
         maxBoundsViscosity: 1.0,
-        minZoom: 2
+        minZoom: 2,
+        zoomSnap: 0.1, // Allow fractional zooms to perfectly fit bounding boxes
+        zoomDelta: 0.5
+
     }).setView([39.8283, -98.5795], 4); // Center of US as default
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -93,36 +96,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     [Math.max(...lats), Math.max(...lngs)]
                 ]);
             } else {
-                bounds = L.latLngBounds(window.allLocationsData.map(l => [l.lat, l.lng]));
+                // Hardcoded Global bounds for baseline
+                bounds = L.latLngBounds([[-55, -130], [65, 155]]);
             }
             
             if (isManual) {
-                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+                map.flyToBounds(bounds, { padding: [30, 30], duration: 1.5 });
             } else {
-                map.fitBounds(bounds, { padding: [50, 50], animate: true });
+                map.fitBounds(bounds, { padding: [30, 30], animate: true });
             }
         }
     };
 
     // Quick Region Panning
+    const regionBounds = {
+        'Global': [[-55, -130], [65, 155]],
+        'Americas': [[-40, -130], [65, -45]],
+        'EMEA': [[-35, -20], [65, 55]],
+        'APAC': [[-45, 65], [50, 175]]
+    };
+
     document.querySelectorAll('.quick-region-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const region = e.target.getAttribute('data-region');
-            if (!window.allLocationsData || window.allLocationsData.length === 0) return;
-
-            let targetLocs = window.allLocationsData;
-            if (region !== 'Global') {
-                targetLocs = window.allLocationsData.filter(l => l.region === region);
-            }
-
-            if (targetLocs.length > 0) {
-                const lats = targetLocs.map(l => l.lat);
-                const lngs = targetLocs.map(l => l.lng);
-                const bounds = L.latLngBounds([
-                    [Math.min(...lats), Math.min(...lngs)],
-                    [Math.max(...lats), Math.max(...lngs)]
-                ]);
-                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+            if (regionBounds[region]) {
+                const bounds = L.latLngBounds(regionBounds[region]);
+                map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
             }
         });
     });
