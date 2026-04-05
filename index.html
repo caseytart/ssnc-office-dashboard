@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SS&C Office Locations Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="map"></div>
+    
+    <!-- Top Metrics Dashboard -->
+    <div class="top-metrics-bar">
+        <div class="dashboard-header-title">Field Services<br>Coverage</div>
+        <div class="metrics-container">
+            <div class="metric-block">
+                <div class="metric-label">Total Users</div>
+                <div id="metric-total-users" class="metric-value">0</div>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-block">
+                <div class="metric-label">Field Techs</div>
+                <div id="metric-total-techs" class="metric-value">0</div>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-block">
+                <div class="metric-label">Tech to User Ratio</div>
+                <div id="metric-ratio" class="metric-value">1:0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Filters Panel -->
+    <div class="map-filters-panel" id="map-filters-panel">
+        <div class="filter-title">Filters</div>
+
+        <div class="filter-group" style="margin-bottom: 10px;">
+            <label for="region-global-filter" style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px;">Region</label>
+            <select id="region-global-filter" class="form-input form-select" style="width: 100%; border-radius: 6px; padding: 6px 10px; font-size:13px; height:auto;">
+                <option value="All">All Regions</option>
+            </select>
+        </div>
+
+        <div class="filter-group" style="margin-bottom: 10px;">
+            <label for="metro-global-filter" style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px;">Metropolitan Area</label>
+            <select id="metro-global-filter" class="form-input form-select" style="width: 100%; border-radius: 6px; padding: 6px 10px; font-size:13px; height:auto;" disabled>
+                <option value="All">Any Metro Area</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="exec-global-filter" style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px;">Business Unit Executive</label>
+            <select id="exec-global-filter" class="form-input form-select" style="width: 100%; border-radius: 6px; padding: 6px 10px; font-size:13px; height:auto;">
+                <option value="All">All Executives (Total Users)</option>
+            </select>
+        </div>
+        
+        <button id="clear-filters-btn" style="margin: 8px 0 16px 0; width: 100%; background: none; border: none; color: var(--text-secondary); font-size: 12px; font-weight: 500; text-decoration: underline; cursor: pointer; display: none; text-align: center; opacity: 0.8; transition: opacity 0.2s;">Clear All Filters</button>
+
+        
+        <div id="legend-container">
+            <div class="map-legend">
+                <div class="legend-title">Coverage Model</div>
+                <div class="legend-item" data-type="on-site" title="Physical location with an assigned local Field Tech.">
+                    <div class="legend-color" style="background-color: var(--color-onsite)"></div> On-Site
+                </div>
+                <div class="legend-item" data-type="near-site" title="Physical location within a 2-4 hour travel distance from an On-Site location.">
+                    <div class="legend-color" style="background-color: var(--color-nearsite)"></div> Near-Site
+                </div>
+                <div class="legend-item" data-type="remote" title="Physical location too far for a day trip. Requires overnight tech travel or remote IT Service Desk support.">
+                    <div class="legend-color" style="background-color: var(--color-remote)"></div> Remotely Supported Location
+                </div>
+                <div class="legend-item" data-type="pure-remote" title="Bucket grouping users who are not physically associated with an SS&C office location.">
+                    <div class="legend-color" style="background-color: var(--color-pureremote); border: 1px dashed rgba(255,255,255,0.8);"></div> Fully Remote Users
+                </div>
+                <div class="legend-item-note" style="font-size: 10px; color: var(--text-secondary); margin-top: 10px; line-height: 1.4; opacity: 0.8; font-style: italic;">
+                    * Hover to preview, click to filter
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Theme Toggle Floating Button -->
+    <div class="controls-group" style="position: absolute; top: 20px; left: 20px; display: flex; gap: 8px; z-index: 10001;">
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme"></button>
+        <button id="ui-visibility-toggle" class="ui-toggle-btn" title="Toggle UI Visibility (H)">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+    </div>
+    
+    <div id="sidebar" class="sidebar">
+        <button id="close-btn" class="close-btn" aria-label="Close Sidebar">&times;</button>
+        <div id="sidebar-content">
+            <div class="empty-state">
+                Select a location on the map to see details
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Location Panel -->
+    <div id="edit-panel" class="sidebar edit-panel">
+        <button id="close-edit-btn" class="close-btn" aria-label="Close Edit">&times;</button>
+        <div id="edit-content">
+            <div class="location-header">
+                <div id="edit-title" class="location-title">Edit Location</div>
+                <div class="status-badge badge-onsite" style="margin-bottom: 12px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3);">Edit Mode</div>
+            </div>
+            <form id="edit-form" class="edit-form">
+                <div class="form-group">
+                    <label class="form-label">Assigned Technicians</label>
+                    <div class="pill-input-container" id="tech-pill-container" tabindex="-1">
+                        <div id="tech-pills-list" class="tech-pills-list"></div>
+                        <input type="text" id="field-techs-input" class="pill-input-field" placeholder="e.g. John Doe, or 5..." autocomplete="off">
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Press Enter or Comma to add</div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <div class="form-group">
+                    <label class="form-label" for="coverage-type-select">Coverage Model</label>
+                    <select id="coverage-type-select" class="form-input form-select">
+                        <option value="on-site">On-Site</option>
+                        <option value="near-site">Near-Site</option>
+                        <option value="remote">Remotely Supported Location</option>
+                        <option value="pure-remote" disabled hidden>Fully Remote Users</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="parent-hub-group" style="display: none;">
+                    <label class="form-label" for="hub-search-input">Supported By (Hub)</label>
+                    <div class="hub-search-wrapper" id="hub-search-wrapper">
+                        <input type="text" id="hub-search-input" class="form-input" placeholder="Search hub locations…" autocomplete="off">
+                        <div class="hub-search-dropdown" id="hub-search-dropdown"></div>
+                        <input type="hidden" id="parent-hub-value">
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Type to filter · click to select</div>
+                </div>
+                
+                <button type="submit" class="save-btn" id="save-btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Save to SharePoint
+                </button>
+                <div id="save-status" class="save-status"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- SheetJS for local XLSX parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <!-- Map Data and Logic -->
+    <script src="api.js"></script>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
