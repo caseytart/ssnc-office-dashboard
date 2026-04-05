@@ -472,11 +472,12 @@ body, html {
     position: relative;
     z-index: 500;
 }
-/* No more light theme bubble coloring - keep it general black as requested */
+/* Light theme cluster bubble - slate grey for clear differentiation from dark mode black */
 [data-theme="light"] .custom-cluster-icon {
-    background: rgba(15, 23, 42, 0.9);
-    color: #f8fafc !important;
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(71, 85, 105, 0.95);
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .custom-cluster-icon:hover {
     transform: scale(1.1);

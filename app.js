@@ -114,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'Americas': [[-40, -130], [65, -45]],
         'EMEA': [[-35, -20], [65, 55]],
         'India': [[5, 65], [37, 100]],
-        'APAC': [[-45, 100], [45, 165]]
+        'India': [[5, 65], [37, 100]],
+        'APAC': [[-42, 95], [42, 155]]
     };
 
     document.querySelectorAll('.quick-region-list-btn').forEach(btn => {
@@ -692,7 +693,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const clearBtn = document.getElementById('clear-filters-btn');
             if (clearBtn) clearBtn.style.display = filtersApplied ? 'flex' : 'none';
 
-            if (!skipSnap) window.snapToActiveExtent(false); 
+            if (!skipSnap) window.snapToActiveExtent(false);
+            
+            // Sync polylines with the newly filtered map state
+            if (window.redrawPolylines) window.redrawPolylines();
         };
 
         // Populate Executive Filter Dropdown
