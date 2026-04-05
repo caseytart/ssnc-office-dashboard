@@ -38,15 +38,28 @@
 
     <!-- Map Filters Panel -->
     <div class="map-filters-panel" id="map-filters-panel">
-        <div class="filter-title">Navigation & Filters</div>
+        <div class="filter-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Navigation & Filters</span>
+            <button id="clear-filters-btn" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 600; cursor: pointer; align-items: center; gap: 4px; text-transform: uppercase;">
+                Clear
+            </button>
+        </div>
 
         <div class="filter-group" style="margin-bottom: 16px;">
             <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:8px;">Quick Region Focus</label>
-            <div class="quick-region-group" style="width: 100%;">
-                <button class="quick-region-btn" data-region="Global" style="flex:1;">Global</button>
-                <button class="quick-region-btn" data-region="Americas" style="flex:1;">Americas</button>
-                <button class="quick-region-btn" data-region="EMEA" style="flex:1;">EMEA</button>
-                <button class="quick-region-btn" data-region="APAC" style="flex:1;">APAC</button>
+            <div class="quick-region-list" style="display: flex; flex-direction: column;">
+                <div class="legend-item quick-region-list-btn" data-region="Global">
+                    <span style="font-weight: 500; color: var(--text-primary); margin-left: 4px;">🌍 Global View</span>
+                </div>
+                <div class="legend-item quick-region-list-btn" data-region="Americas">
+                    <span style="font-weight: 500; color: var(--text-primary); margin-left: 4px;">🌎 Americas</span>
+                </div>
+                <div class="legend-item quick-region-list-btn" data-region="EMEA">
+                    <span style="font-weight: 500; color: var(--text-primary); margin-left: 4px;">🌍 EMEA</span>
+                </div>
+                <div class="legend-item quick-region-list-btn" data-region="APAC">
+                    <span style="font-weight: 500; color: var(--text-primary); margin-left: 4px;">🌏 APAC</span>
+                </div>
             </div>
         </div>
         
@@ -56,8 +69,6 @@
                 <option value="All">All Executives (Total Users)</option>
             </select>
         </div>
-        
-        <button id="clear-filters-btn" style="margin: 8px 0 16px 0; width: 100%; background: none; border: none; color: var(--text-secondary); font-size: 12px; font-weight: 500; text-decoration: underline; cursor: pointer; display: none; text-align: center; opacity: 0.8; transition: opacity 0.2s;">Clear All Filters</button>
 
         
         <div id="legend-container">

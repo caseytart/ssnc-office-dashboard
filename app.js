@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
         'APAC': [[-45, 65], [50, 175]]
     };
 
-    document.querySelectorAll('.quick-region-btn').forEach(btn => {
+    document.querySelectorAll('.quick-region-list-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const region = e.target.getAttribute('data-region');
+            const region = e.currentTarget.getAttribute('data-region');
             if (regionBounds[region]) {
                 const bounds = L.latLngBounds(regionBounds[region]);
                 map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
@@ -644,9 +644,9 @@ document.addEventListener('DOMContentLoaded', () => {
             updateMetroFlares();
             
             // Phase 6: Auto-center and zoom map
-            const filtersApplied = filterExec !== 'All' || filterRegion !== 'All' || filterMetro !== 'All' || filterCoverage !== 'All';
+            const filtersApplied = filterExec !== 'All' || filterCoverage !== 'All';
             const clearBtn = document.getElementById('clear-filters-btn');
-            if (clearBtn) clearBtn.style.display = filtersApplied ? 'block' : 'none';
+            if (clearBtn) clearBtn.style.display = filtersApplied ? 'flex' : 'none';
 
             window.snapToActiveExtent(false); 
         };
@@ -664,59 +664,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Populate Geographic Filters
-        const regionSelect = document.getElementById('region-global-filter');
-        const metroSelect = document.getElementById('metro-global-filter');
-        
-        if (regionSelect && metroSelect) {
-            const sortedRegions = Object.keys(window.regionMetroMap).sort();
-            regionSelect.innerHTML = `<option value="All">All Regions</option>` +
-                sortedRegions.map(r => `<option value="${r}">${r}</option>`).join('');
-
-            regionSelect.addEventListener('change', (e) => {
-                const reg = e.target.value;
-                window.globalFilters.region = reg;
+        // Clear All Filters Button
+        const clearBtn = document.getElementById('clear-filters-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                const execSelect = document.getElementById('exec-global-filter');
+                if (execSelect) execSelect.value = 'All';
                 
-                if (reg === 'All') {
-                    metroSelect.innerHTML = `<option value="All">Any Metro Area</option>`;
-                    metroSelect.disabled = true;
-                    window.globalFilters.metroArea = 'All';
-                } else {
-                    metroSelect.disabled = false;
-                    const sortedMetros = Array.from(window.regionMetroMap[reg]).sort();
-                    metroSelect.innerHTML = `<option value="All">Any Metro Area</option>` +
-                        sortedMetros.map(m => `<option value="${m}">${m}</option>`).join('');
-                    window.globalFilters.metroArea = 'All';
+                window.globalFilters = { executive: 'All', region: 'All', metroArea: 'All', coverageModel: 'All' };
+                
+                // Reset legend UI
+                const legendDiv = document.querySelector('.map-legend');
+                if (legendDiv) {
+                    legendDiv.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
                 }
+
                 window.recalculateMetricsAndMap();
             });
-            
-            metroSelect.addEventListener('change', (e) => {
-                window.globalFilters.metroArea = e.target.value;
-                window.recalculateMetricsAndMap();
-            });
-
-            // Clear All Filters Button
-            const clearBtn = document.getElementById('clear-filters-btn');
-            if (clearBtn) {
-                clearBtn.addEventListener('click', () => {
-                    const execSelect = document.getElementById('exec-global-filter');
-                    if (execSelect) execSelect.value = 'All';
-                    regionSelect.value = 'All';
-                    metroSelect.innerHTML = `<option value="All">Any Metro Area</option>`;
-                    metroSelect.disabled = true;
-                    
-                    window.globalFilters = { executive: 'All', region: 'All', metroArea: 'All', coverageModel: 'All' };
-                    
-                    // Reset legend UI
-                    const legendDiv = document.querySelector('.map-legend');
-                    if (legendDiv) {
-                        legendDiv.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
-                    }
-
-                    window.recalculateMetricsAndMap();
-                });
-            }
         }
         
         // Execute initial calculation
