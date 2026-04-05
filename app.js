@@ -74,10 +74,47 @@ document.addEventListener('DOMContentLoaded', () => {
         uiToggleBtn.addEventListener('click', toggleUI);
     }
 
-    // Add keyboard shortcut 'H' for hide
+    // --- Focus Snap Logic ---
+    const focusSnapBtn = document.getElementById('focus-snap-btn');
+    window.snapToActiveExtent = (isManual = false) => {
+        const activeLocs = window.allLocationsData ? window.allLocationsData.filter(l => l.filteredStaff > 0) : [];
+        const filtersApplied = window.globalFilters.executive !== 'All' || window.globalFilters.region !== 'All' || window.globalFilters.metroArea !== 'All' || window.globalFilters.coverageModel !== 'All';
+
+        if (activeLocs.length > 0) {
+            let bounds;
+            if (filtersApplied || isManual) {
+                const lats = activeLocs.map(l => l.lat);
+                const lngs = activeLocs.map(l => l.lng);
+                bounds = L.latLngBounds([
+                    [Math.min(...lats), Math.min(...lngs)],
+                    [Math.max(...lats), Math.max(...lngs)]
+                ]);
+            } else {
+                bounds = L.latLngBounds(window.allLocationsData.map(l => [l.lat, l.lng]));
+            }
+            
+            // Use flyToBounds for a smoother transition on manual focus
+            if (isManual) {
+                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+            } else {
+                map.fitBounds(bounds, { padding: [50, 50], animate: true });
+            }
+        }
+    };
+
+    if (focusSnapBtn) {
+        focusSnapBtn.addEventListener('click', () => window.snapToActiveExtent(true));
+    }
+
+    // Add keyboard shortcut 'H' for hide and 'F' for focus
     document.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'h' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+        const char = e.key.toLowerCase();
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+        
+        if (char === 'h') {
             toggleUI();
+        } else if (char === 'f') {
+            window.snapToActiveExtent(true);
         }
     });
 
@@ -98,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.regionMetroMap = {};
 
     const initDataAndDraw = async () => {
+        window.allLocationsData = locationData; // Make accessible globally for Focus Snap
         try {
             // Prepare arrays and mappings for all locations
             locationData.forEach(l => {
@@ -528,20 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const clearBtn = document.getElementById('clear-filters-btn');
             if (clearBtn) clearBtn.style.display = filtersApplied ? 'block' : 'none';
 
-            if (activeLocs.length > 0) {
-                if (filtersApplied) {
-                    const lats = activeLocs.map(l => l.lat);
-                    const lngs = activeLocs.map(l => l.lng);
-                    const bounds = L.latLngBounds([
-                        [Math.min(...lats), Math.min(...lngs)],
-                        [Math.max(...lats), Math.max(...lngs)]
-                    ]);
-                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 5 });
-                } else {
-                    const bounds = L.latLngBounds(locationData.map(l => [l.lat, l.lng]));
-                    map.fitBounds(bounds, { padding: [50, 50] });
-                }
-            }
+            window.snapToActiveExtent(false); 
         };
 
         // Populate Executive Filter Dropdown

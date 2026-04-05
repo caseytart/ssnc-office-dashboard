@@ -400,6 +400,16 @@ body, html {
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
 }
 
+.theme-toggle:active, .ui-toggle-btn:active {
+    transform: translateY(0px) scale(0.95);
+    transition: transform 0.1s;
+}
+
+.ui-toggle-btn.active {
+    background: var(--color-on-active); /* For the hide UI mode highlight */
+    border-color: var(--color-on-active-border);
+}
+
 .ui-toggle-btn.active {
     background: #3b82f6;
     border-color: #3b82f6;
