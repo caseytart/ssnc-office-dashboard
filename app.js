@@ -3,14 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dark themed map tiles (CartoDB Dark Matter)
     const maxBounds = L.latLngBounds([[-90, -180], [90, 180]]);
     const map = L.map('map', {
-        zoomControl: false, // Put zoom elsewhere
-        maxBounds: maxBounds,
-        maxBoundsViscosity: 1.0,
-        minZoom: 2,
-        zoomSnap: 0.1, // Allow fractional zooms to perfectly fit bounding boxes
+        zoomControl: false,
+        zoomSnap: 0.1,
         zoomDelta: 0.5
-
-    }).setView([39.8283, -98.5795], 4); // Center of US as default
+    }).setView([39.8283, -98.5795], 4);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -118,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'Americas': [[-40, -130], [65, -45]],
         'EMEA': [[-35, -20], [65, 55]],
         'India': [[5, 65], [37, 100]],
-        'APAC': [[-45, 100], [50, 175]]
+        'APAC': [[-45, 100], [45, 165]]
     };
 
     document.querySelectorAll('.quick-region-list-btn').forEach(btn => {
