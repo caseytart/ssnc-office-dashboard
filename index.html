@@ -38,20 +38,16 @@
 
     <!-- Map Filters Panel -->
     <div class="map-filters-panel" id="map-filters-panel">
-        <div class="filter-title">Filters</div>
+        <div class="filter-title">Navigation & Filters</div>
 
-        <div class="filter-group" style="margin-bottom: 10px;">
-            <label for="region-global-filter" style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px;">Region</label>
-            <select id="region-global-filter" class="form-input form-select" style="width: 100%; border-radius: 6px; padding: 6px 10px; font-size:13px; height:auto;">
-                <option value="All">All Regions</option>
-            </select>
-        </div>
-
-        <div class="filter-group" style="margin-bottom: 10px;">
-            <label for="metro-global-filter" style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px;">Metropolitan Area</label>
-            <select id="metro-global-filter" class="form-input form-select" style="width: 100%; border-radius: 6px; padding: 6px 10px; font-size:13px; height:auto;" disabled>
-                <option value="All">Any Metro Area</option>
-            </select>
+        <div class="filter-group" style="margin-bottom: 16px;">
+            <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:8px;">Quick Region Focus</label>
+            <div class="quick-region-group" style="width: 100%;">
+                <button class="quick-region-btn" data-region="Global" style="flex:1;">Global</button>
+                <button class="quick-region-btn" data-region="Americas" style="flex:1;">Americas</button>
+                <button class="quick-region-btn" data-region="EMEA" style="flex:1;">EMEA</button>
+                <button class="quick-region-btn" data-region="APAC" style="flex:1;">APAC</button>
+            </div>
         </div>
         
         <div class="filter-group">
@@ -86,18 +82,10 @@
         </div>
     </div>
     
-    <!-- Theme Toggle Floating Button -->
-    <div class="controls-group">
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme"></button>
-        <div class="quick-region-group">
-            <button class="quick-region-btn" data-region="Global" title="Focus Global">Global</button>
-            <button class="quick-region-btn" data-region="Americas" title="Focus Americas">Americas</button>
-            <button class="quick-region-btn" data-region="EMEA" title="Focus EMEA">EMEA</button>
-            <button class="quick-region-btn" data-region="APAC" title="Focus APAC">APAC</button>
-        </div>
-        <button id="ui-visibility-toggle" class="ui-toggle-btn" title="Toggle UI Visibility (H)">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-        </button>
+    <!-- Top Left Tool Buttons -->
+    <div class="controls-group" style="display: flex; gap: 12px;">
+        <button id="theme-toggle" class="ui-pill-btn" aria-label="Toggle Theme"></button>
+        <button id="ui-visibility-toggle" class="ui-pill-btn" title="Toggle UI Visibility (H)"></button>
     </div>
     
     <div id="sidebar" class="sidebar">

@@ -375,37 +375,37 @@ body, html {
     gap: 12px;
 }
 
-.theme-toggle, .ui-toggle-btn {
+.ui-pill-btn {
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-glass);
     color: var(--text-primary);
-    width: 44px;
+    padding: 0 16px;
     height: 44px;
     border-radius: 12px;
     cursor: pointer;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0.9;
 }
 
-.theme-toggle:hover, .ui-toggle-btn:hover {
+.ui-pill-btn:hover {
     transform: translateY(-2px);
     background: var(--bg-card-hover);
     opacity: 1;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
 }
 
-.theme-toggle:active, .ui-toggle-btn:active {
+.ui-pill-btn:active {
     transform: translateY(0px) scale(0.95);
     transition: transform 0.1s;
 }
 
-.ui-toggle-btn.active {
+.ui-pill-btn.active {
     background: var(--color-on-active);
     border-color: var(--color-on-active-border);
     color: white;
@@ -429,9 +429,9 @@ body, html {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    padding: 0 16px;
-    height: 44px;
-    font-size: 13px;
+    padding: 0 4px;
+    height: 40px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
