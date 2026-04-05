@@ -6,6 +6,8 @@
     <title>SS&C Office Locations Map</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -87,9 +89,12 @@
     <!-- Theme Toggle Floating Button -->
     <div class="controls-group">
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme"></button>
-        <button id="focus-snap-btn" class="ui-toggle-btn" title="Focus on Active Locations (F)">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
-        </button>
+        <div class="quick-region-group">
+            <button class="quick-region-btn" data-region="Global" title="Focus Global">Global</button>
+            <button class="quick-region-btn" data-region="Americas" title="Focus Americas">Americas</button>
+            <button class="quick-region-btn" data-region="EMEA" title="Focus EMEA">EMEA</button>
+            <button class="quick-region-btn" data-region="APAC" title="Focus APAC">APAC</button>
+        </div>
         <button id="ui-visibility-toggle" class="ui-toggle-btn" title="Toggle UI Visibility (H)">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         </button>
@@ -155,6 +160,7 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <!-- SheetJS for local XLSX parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     

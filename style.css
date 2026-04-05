@@ -406,16 +406,81 @@ body, html {
 }
 
 .ui-toggle-btn.active {
-    background: var(--color-on-active); /* For the hide UI mode highlight */
+    background: var(--color-on-active);
     border-color: var(--color-on-active-border);
-}
-
-.ui-toggle-btn.active {
-    background: #3b82f6;
-    border-color: #3b82f6;
     color: white;
 }
 
+/* Quick Region Panning Buttons */
+.quick-region-group {
+    display: flex;
+    gap: 0;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+}
+
+.quick-region-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0 16px;
+    height: 44px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid var(--border-glass);
+}
+.quick-region-btn:last-child { border-right: none; }
+.quick-region-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+.quick-region-btn:active {
+    background: var(--color-on-active);
+    color: white;
+}
+
+/* Active Clear Filters Button */
+#clear-filters-btn.active-clear {
+    color: #ef4444 !important; /* Muted Red */
+    opacity: 1 !important;
+}
+
+/* MarkerCluster Custom Styles */
+.custom-cluster-icon {
+    border-radius: 50%;
+    background: var(--bg-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid var(--text-primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+}
+.custom-cluster-icon:hover {
+    transform: scale(1.1);
+    border-color: var(--color-onsite);
+}
+.cluster-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+}
+.cluster-users { font-size: 14px; }
+.cluster-techs { font-size: 10px; color: var(--color-nearsite); font-weight: 600; }
 /* UI Hiding Engine */
 .ui-hidden .top-metrics-bar,
 .ui-hidden .map-filters-panel,

@@ -1,8 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Initialize Map
     // Dark themed map tiles (CartoDB Dark Matter)
+    const maxBounds = L.latLngBounds([[-90, -180], [90, 180]]);
     const map = L.map('map', {
-        zoomControl: false // Put zoom elsewhere
+        zoomControl: false, // Put zoom elsewhere
+        maxBounds: maxBounds,
+        maxBoundsViscosity: 1.0,
+        minZoom: 2
     }).setView([39.8283, -98.5795], 4); // Center of US as default
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -74,8 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uiToggleBtn.addEventListener('click', toggleUI);
     }
 
-    // --- Focus Snap Logic ---
-    const focusSnapBtn = document.getElementById('focus-snap-btn');
+    // --- Quick Region & Focus Logic ---
     window.snapToActiveExtent = (isManual = false) => {
         const activeLocs = window.allLocationsData ? window.allLocationsData.filter(l => l.filteredStaff > 0) : [];
         const filtersApplied = window.globalFilters.executive !== 'All' || window.globalFilters.region !== 'All' || window.globalFilters.metroArea !== 'All' || window.globalFilters.coverageModel !== 'All';
@@ -93,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 bounds = L.latLngBounds(window.allLocationsData.map(l => [l.lat, l.lng]));
             }
             
-            // Use flyToBounds for a smoother transition on manual focus
             if (isManual) {
                 map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
             } else {
@@ -102,9 +104,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    if (focusSnapBtn) {
-        focusSnapBtn.addEventListener('click', () => window.snapToActiveExtent(true));
-    }
+    // Quick Region Panning
+    document.querySelectorAll('.quick-region-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const region = e.target.getAttribute('data-region');
+            if (!window.allLocationsData || window.allLocationsData.length === 0) return;
+
+            let targetLocs = window.allLocationsData;
+            if (region !== 'Global') {
+                targetLocs = window.allLocationsData.filter(l => l.region === region);
+            }
+
+            if (targetLocs.length > 0) {
+                const lats = targetLocs.map(l => l.lat);
+                const lngs = targetLocs.map(l => l.lng);
+                const bounds = L.latLngBounds([
+                    [Math.min(...lats), Math.min(...lngs)],
+                    [Math.max(...lats), Math.max(...lngs)]
+                ]);
+                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+            }
+        });
+    });
 
     // Add keyboard shortcut 'H' for hide and 'F' for focus
     document.addEventListener('keydown', (e) => {
@@ -433,6 +454,51 @@ document.addEventListener('DOMContentLoaded', () => {
         // Expose globally so the edit panel save handler can call it
         window.redrawMarker = redrawMarker;
 
+        // Setup MarkerClustering
+        const markerCluster = L.markerClusterGroup({
+            maxClusterRadius: 40,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            iconCreateFunction: function (cluster) {
+                const childCount = cluster.getChildCount();
+                const children = cluster.getAllChildMarkers();
+                
+                let clusterUsers = 0;
+                let clusterTechs = 0;
+
+                children.forEach(m => {
+                    if (m.options && m.options.locData) {
+                        clusterUsers += (m.options.locData.filteredStaff || 0);
+                        clusterTechs += (m.options.locData.itFieldSupport || 0);
+                    }
+                });
+
+                if (clusterUsers === 0) {
+                    return L.divIcon({ html: '<div style="display:none;"></div>', className: 'hidden-cluster' });
+                }
+
+                // Size scaling for clusters based on aggregated users
+                let size = 36;
+                if (clusterUsers > 500) size = 44;
+                if (clusterUsers > 2000) size = 52;
+                if (clusterUsers > 10000) size = 60;
+                
+                const techHtml = clusterTechs > 0 ? `<div class="cluster-techs">${clusterTechs} Techs</div>` : '';
+
+                return L.divIcon({ 
+                    html: `
+                        <div class="cluster-content">
+                            <div class="cluster-users">${clusterUsers.toLocaleString()}</div>
+                            ${techHtml}
+                        </div>
+                    `, 
+                    className: 'custom-cluster-icon', 
+                    iconSize: L.point(size, size) 
+                });
+            }
+        });
+        map.addLayer(markerCluster);
+
         // Loop through locations to instantiate baseline markers
         locationData.forEach(loc => {
             // Give it a generic icon initially, will be resized
@@ -443,7 +509,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 html: `<div class="custom-marker-inner ${typeToClass(loc.type)}"></div>`
             });
 
-            const marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
+            // Store locData in options so the cluster can read it
+            const marker = L.marker([loc.lat, loc.lng], { icon: customIcon, locData: loc });
+            markerCluster.addLayer(marker);
+            
+            // Initial Tooltip (will be replaced)
             marker.bindTooltip(`<b>${loc.name}</b>`);
             markersById[loc.id] = marker;
 
@@ -516,6 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     marker.setIcon(customIcon);
                     marker.setTooltipContent(`<b>${loc.name}</b><br>Filtered out`);
                 } else {
+                    // Marker size scaling logic
                     const minSize = 18;
                     const maxSize = 70;
                     let scale = 0;
@@ -535,10 +606,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     marker.setIcon(customIcon);
                     
-                    const tooltipText = filterExec === 'All' ? `${loc.filteredStaff} users` : `${loc.filteredStaff} users for ${filterExec}`;
-                    marker.setTooltipContent(`<b>${loc.name}</b><br>${tooltipText}`);
+                    const techRow = (loc.itFieldSupport || 0) > 0 ? 
+                        `<tr><td>Field Techs:</td><td style="text-align:right; font-weight:600; color:var(--color-nearsite);">${loc.itFieldSupport}</td></tr>` : '';
+                    
+                    const tooltipHtml = `
+                        <div style="font-family: 'Inter', sans-serif; min-width: 140px;">
+                            <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; margin-bottom: 4px; font-weight: 600;">${loc.name}</div>
+                            <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                                <tr><td>Active Users:</td><td style="text-align:right; font-weight:600;">${loc.filteredStaff.toLocaleString()}</td></tr>
+                                ${techRow}
+                            </table>
+                        </div>
+                    `;
+                    marker.setTooltipContent(tooltipHtml);
                 }
             });
+
+            // Trigger MarkerCluster to recalculate aggregation icons given new locData sizes
+            markerCluster.refreshClusters();
 
             // Phase 4: Update Dashboard UI
             const elUsers = document.getElementById('metric-total-users');
