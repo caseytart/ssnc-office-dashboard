@@ -65,7 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const isHidden = document.body.classList.toggle('ui-hidden');
         if (isHidden) {
             const sidebar = document.getElementById('sidebar');
+            const editPanel = document.getElementById('edit-panel');
             if (sidebar) sidebar.classList.remove('active');
+            if (editPanel) editPanel.classList.remove('active');
         }
         if (uiToggleBtn) {
             uiToggleBtn.classList.toggle('active', isHidden);
@@ -115,7 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'Global': [[-55, -130], [65, 155]],
         'Americas': [[-40, -130], [65, -45]],
         'EMEA': [[-35, -20], [65, 55]],
-        'APAC': [[-45, 65], [50, 175]]
+        'India': [[5, 65], [37, 100]],
+        'APAC': [[-45, 100], [50, 175]]
     };
 
     document.querySelectorAll('.quick-region-list-btn').forEach(btn => {
@@ -382,12 +385,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loc.parentId && locationsById[loc.parentId]) {
                     const parent = locationsById[loc.parentId];
                     
-                    L.polyline([[loc.lat, loc.lng], [parent.lat, parent.lng]], {
-                        color: '#ef4444',
-                        weight: 2,
-                        opacity: 0.4,
-                        dashArray: '5, 5'
-                    }).addTo(polylineLayer);
+                    // Only draw if BOTH child and parent are active (filteredStaff > 0)
+                    if (loc.filteredStaff > 0 && parent.filteredStaff > 0) {
+                        L.polyline([[loc.lat, loc.lng], [parent.lat, parent.lng]], {
+                            color: '#ef4444',
+                            weight: 2,
+                            opacity: 0.4,
+                            dashArray: '5, 5'
+                        }).addTo(polylineLayer);
+                    }
                 }
             });
         };
@@ -517,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const techHtml = clusterTechs > 0 ? `<div class="cluster-techs">${clusterTechs} Techs</div>` : '';
                 
                 let pulseHtml = '';
+                // Ensure pulses only show if there are active dots of that type in the grouping
                 if (hasOnsite) pulseHtml += '<div class="cluster-pulse-ring cluster-pulse-onsite"></div>';
                 if (hasNearsite) pulseHtml += '<div class="cluster-pulse-ring cluster-pulse-nearsite"></div>';
                 if (hasRemote) pulseHtml += '<div class="cluster-pulse-ring cluster-pulse-remote"></div>';
@@ -714,6 +721,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 window.globalFilters = { executive: 'All', region: 'All', metroArea: 'All', coverageModel: 'All' };
                 
+                // Reset region button states
+                document.querySelectorAll('.quick-region-list-btn').forEach(b => b.classList.remove('active'));
+
                 // Reset legend UI
                 const legendDiv = document.querySelector('.map-legend');
                 if (legendDiv) {
